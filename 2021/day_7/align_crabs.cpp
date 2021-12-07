@@ -39,7 +39,11 @@ int main(int argc, char *argv[]) {
             align_cost += (one_crab_align_cost * align_from.second);
         }
 
-        min_align_cost = std::min(min_align_cost, align_cost);
+        if (align_cost < min_align_cost) {
+            min_align_cost = align_cost;
+        } else {
+            break;
+        }
     }
 
     std::cout << "alignment cost: " << min_align_cost << std::endl;
