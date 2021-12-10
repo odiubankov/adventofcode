@@ -1,0 +1,52 @@
+0   -   a,b,c,e,f,g     - 6
+1   -   c,f             - 2     unique
+2   -   a,c,d,e,g       - 5
+3   -   a,c,d,f,g       - 5
+4   -   b,c,d,f         - 4     unique
+5   -   a,b,d,f,g       - 5
+6   -   a,b,d,e,f,g     - 6
+7   -   a,c,f           - 3     unique
+8   -   a,b,c,d,e,f,g   - 7     unique
+9   -   a,b,c,d,f,g     - 6
+
+be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
+2  7       6      6      4    5     6      5     5     3     7       5     6      4
+
+be        - cf
+fa        - eg
+fbea      - cefg
+
+d         - a
+b         - cf
+e         - cf
+c         - b
+f         - eg
+g         - d
+a         - eg
+
+===========================
+0 abcefg
+1 cf
+2 acdeg
+3 acdfg
+4 bcdf
+5 abdfg
+6 abdefg
+7 acf
+8 abcdefg
+9 abcdfg
+
+2 - cf
+3 - acf
+4 - bcdf
+5 - abcdefg
+6 - abcdefg
+7 - abcdefg
+
+lenght -> possible character mappings for each character
+length -> possible digits -> unordered_map<digit, unordered_set<char>>
+
+try substitute a character by character
+in each length -> find a digit that contains this character. remove the digit otherwise.
+if digits map is empty -> break attempt
+if reached end -> memorize mapping
