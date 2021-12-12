@@ -7,6 +7,7 @@
 
 namespace {
 constexpr auto cave_connector = '-';
+constexpr std::size_t multi_visit_max_cnt = 2;
 const std::string start_cave = "start";
 const std::string end_cave = "end";
 
@@ -14,7 +15,7 @@ using Cave = std::string;
 using CaveConnections = std::vector<Cave>;
 using CaveGraph = std::unordered_map<Cave, CaveConnections>;
 using CavesConnection = std::pair<Cave, Cave>;
-using VisitedCaves = std::unordered_set<Cave>;
+using VisitedCaves = std::unordered_map<Cave, std::size_t>;
 
 bool is_small_cave(const Cave& cave) {
     return cave.front() >= 'a' && cave.front() <= 'z';
@@ -43,25 +44,30 @@ CaveGraph read_cave_graph(const std::string& input_path) {
 std::size_t get_path_count(
         const CaveGraph& cave_graph,
         const Cave& from,
-        VisitedCaves& visited_caves) {
+        VisitedCaves& visited_caves, 
+        const Cave& multi_visit_cave) {
     if (from == end_cave) {
-        return 1;
+        if (multi_visit_cave.empty() || visited_caves[multi_visit_cave] > 1)
+            return 1;
+        return 0;
     }
 
     std::size_t path_count = 0;
     const auto small_cave = is_small_cave(from);
     if (small_cave) {
-        visited_caves.insert(from);
+        ++visited_caves[from];
     }
 
     for (const auto& connection : cave_graph.at(from)) {
-        if (visited_caves.find(connection) == end(visited_caves)) {
-            path_count += get_path_count(cave_graph, connection, visited_caves);
+        if (visited_caves[connection] == 0) {
+            path_count += get_path_count(cave_graph, connection, visited_caves, multi_visit_cave);
+        } else if (connection == multi_visit_cave && visited_caves[connection] < multi_visit_max_cnt) {
+            path_count += get_path_count(cave_graph, connection, visited_caves, multi_visit_cave);
         }
     }
 
     if (small_cave) {
-        visited_caves.erase(from);
+        --visited_caves[from];
     }
 
     return path_count;
@@ -72,7 +78,20 @@ std::size_t get_path_count(
 int main(int argc, char *argv[]) {
     const std::string input_path = argv[1];
     const auto caves_graph = read_cave_graph(input_path);
+    
     VisitedCaves visited_caves;
-    const auto path_count = get_path_count(caves_graph, start_cave, visited_caves);
-    std::cout << "path count " << path_count << std::endl;
+    const auto path_count = get_path_count(caves_graph, start_cave, visited_caves, "");
+    std::cout << "path count " << path_count << std::endl;        
+
+    std::size_t multi_visit_path_count = path_count;
+    for (const auto& cave : caves_graph) {
+        if (cave.first == start_cave || cave.first == end_cave) {
+            continue;
+        }
+
+        visited_caves.clear();
+        multi_visit_path_count += get_path_count(caves_graph, start_cave, visited_caves, cave.first);
+    }
+
+    std::cout << "multi visit path count " << multi_visit_path_count << std::endl;
 }
